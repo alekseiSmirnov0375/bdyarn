@@ -1,0 +1,17 @@
+<!DOCTYPE HTML>
+<html xmlns:th="http://www.thymeleaf.org">
+<head> 
+    <title>Yarn container allocation parameters</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+</head>
+<body>
+	<h1>Yarn container allocation parameters</h1>
+    <form action="#" th:action="@{/yarnAppParameters}" th:object="${yarnAppParameters}" method="post">
+    	<p>Number of containers: <input type="text" th:field="*{containersNum}" /></p>
+        <p>Priority: <input type="text" th:field="*{priority}" /></p>
+        <p>Memory: <input type="text" th:field="*{memory}" /></p>
+        <p>Number of cores: <input type="text" th:field="*{coresNum}" /></p>
+        <p><input type="submit" value="Submit" /> <input type="reset" value="Reset" /></p>
+    </form>
+</body>
+</html>

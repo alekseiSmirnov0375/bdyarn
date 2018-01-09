@@ -1,0 +1,14 @@
+<!DOCTYPE HTML>
+<html xmlns:th="http://www.thymeleaf.org">
+<head> 
+    <title></title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+</head>
+<body>
+	<h1>Yarn containers allocated:</h1>
+    <p th:text="'containersNum: ' + ${yarnAppParameters.containersNum}" />
+    <p th:text="'priority: ' + ${yarnAppParameters.priority}" />
+    <p th:text="'memory: ' + ${yarnAppParameters.memory}" />
+    <p th:text="'coresNum: ' + ${yarnAppParameters.coresNum}" />
+</body>
+</html>
