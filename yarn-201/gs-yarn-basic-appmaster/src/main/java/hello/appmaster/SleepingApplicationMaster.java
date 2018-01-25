@@ -13,6 +13,8 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.yarn.am.StaticAppmaster;
 import org.springframework.yarn.am.StaticEventingAppmaster;
 import org.springframework.yarn.am.allocate.AbstractAllocator;
+import org.springframework.yarn.am.allocate.ContainerAllocateData;
+import org.springframework.yarn.am.allocate.DefaultContainerAllocator;
 import org.springframework.yarn.am.monitor.ContainerAware;
 
 import java.util.Arrays;
@@ -42,11 +44,28 @@ public class SleepingApplicationMaster extends StaticEventingAppmaster {
     }
 
     public void startContainer(YarnAppParameters params) {
-        log.info("Container allocation: " + params.getContainersNum() + " allocated containers");
-        getAllocator().allocateContainers(params.getContainersNum());
-        log.info("Commands: ");
-        for (String command: getCommands()) {
-            log.info(command + ",");
+//        if (getAllocator() instanceof DefaultContainerAllocator) {
+//            DefaultContainerAllocator allocator = (DefaultContainerAllocator)getAllocator();
+//            allocator.setAllocationValues(
+//                    "yarn-test-app",
+//                    params.getPriority(),
+//                    "",
+//                    params.getCoresNum(),
+//                    params.getMemory(),
+//                    false
+//            );
+//            ContainerAllocateData data = new ContainerAllocateData();
+//            data.setId("yarn-test-app");
+//            data.addAny(params.getContainersNum());
+//            allocator.allocateContainers(data);
+//        }
+        if (getAllocator() instanceof DefaultContainerAllocator) {
+            DefaultContainerAllocator allocator = (DefaultContainerAllocator)getAllocator();
+            allocator.setPriority(params.getPriority());
+            allocator.setMemory(params.getMemory());
+            allocator.setVirtualcores(params.getCoresNum());
+            allocator.allocateContainers(params.getContainersNum());
+            log.info("Container allocation: " + params.getContainersNum() + " allocated containers");
         }
     }
 }
