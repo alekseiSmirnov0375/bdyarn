@@ -44,28 +44,30 @@ public class SleepingApplicationMaster extends StaticEventingAppmaster {
     }
 
     public void startContainer(YarnAppParameters params) {
-//        if (getAllocator() instanceof DefaultContainerAllocator) {
-//            DefaultContainerAllocator allocator = (DefaultContainerAllocator)getAllocator();
-//            allocator.setAllocationValues(
-//                    "yarn-test-app",
-//                    params.getPriority(),
-//                    "",
-//                    params.getCoresNum(),
-//                    params.getMemory(),
-//                    false
-//            );
-//            ContainerAllocateData data = new ContainerAllocateData();
-//            data.setId("yarn-test-app");
-//            data.addAny(params.getContainersNum());
-//            allocator.allocateContainers(data);
-//        }
         if (getAllocator() instanceof DefaultContainerAllocator) {
             DefaultContainerAllocator allocator = (DefaultContainerAllocator)getAllocator();
-            allocator.setPriority(params.getPriority());
-            allocator.setMemory(params.getMemory());
-            allocator.setVirtualcores(params.getCoresNum());
-            allocator.allocateContainers(params.getContainersNum());
+            allocator.setAllocationValues(
+                    "yarn-test-app",
+                    params.getPriority(),
+                    "",
+                    params.getCoresNum(),
+                    params.getMemory(),
+                    false
+            );
+            ContainerAllocateData data = new ContainerAllocateData();
+            data.setId("yarn-test-app");
+            data.addAny(params.getContainersNum());
+            allocator.allocateContainers(data);
             log.info("Container allocation: " + params.getContainersNum() + " allocated containers");
         }
+//        if (getAllocator() instanceof DefaultContainerAllocator) {
+//            DefaultContainerAllocator allocator = (DefaultContainerAllocator)getAllocator();
+//            allocator.setPriority(params.getPriority());
+//            allocator.setMemory(params.getMemory());
+//            allocator.setVirtualcores(params.getCoresNum());
+//            allocator.allocateContainers(params.getContainersNum());
+//            log.info("Container allocation: " + params.getContainersNum() + " allocated containers");
+//        }
+        getAllocator().allocateContainers(0);
     }
 }
