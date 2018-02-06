@@ -68,6 +68,5 @@ public class SleepingApplicationMaster extends StaticEventingAppmaster {
 //            allocator.allocateContainers(params.getContainersNum());
 //            log.info("Container allocation: " + params.getContainersNum() + " allocated containers");
 //        }
-        getAllocator().allocateContainers(0);
     }
 }
