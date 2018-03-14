@@ -11,7 +11,8 @@
         <p>Priority: <input type="text" th:field="*{priority}" /></p>
         <p>Memory: <input type="text" th:field="*{memory}" /></p>
         <p>Number of cores: <input type="text" th:field="*{coresNum}" /></p>
-        <p><input type="submit" value="Submit" /> <input type="reset" value="Reset" /></p>
+        <p><button type="submit" name="action" value="submit" >Allocate</button> <input type="reset" value="Reset" /></p>
+        <p><button type="submit" name="action" value="close">Close application</button> </p>
     </form>
 </body>
 </html>

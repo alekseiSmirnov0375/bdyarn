@@ -7,6 +7,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 
 @Controller
 public class ContainerAllocationController {
@@ -21,9 +22,13 @@ public class ContainerAllocationController {
     }
 
     @RequestMapping(method = RequestMethod.POST, value = "/yarnAppParameters")
-    public String yarnAppParametersSubmit(@ModelAttribute YarnAppParameters yarnAppParameters) {
-        context.getBean(SleepingApplicationMaster.class).startContainer(yarnAppParameters);
-        return "result";
+    public String yarnAppParametersSubmit(@ModelAttribute YarnAppParameters yarnAppParameters, @RequestParam(value="action") String action) {
+        if (action.equals("close")) {
+            context.getBean(EndlessContainerAllocationApplicationMaster.class).stopApplicationMaster();
+            return "Application has been stopped";
+        } else {
+            context.getBean(EndlessContainerAllocationApplicationMaster.class).startContainer(yarnAppParameters);
+            return "result";
+        }
     }
-
 }

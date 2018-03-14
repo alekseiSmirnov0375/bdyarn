@@ -3,14 +3,8 @@ package hello.appmaster;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.yarn.api.records.Container;
-import org.apache.hadoop.yarn.api.records.ContainerLaunchContext;
-
-import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.yarn.am.StaticAppmaster;
+import org.apache.hadoop.yarn.api.records.ContainerStatus;
+import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
 import org.springframework.yarn.am.StaticEventingAppmaster;
 import org.springframework.yarn.am.allocate.AbstractAllocator;
 import org.springframework.yarn.am.allocate.ContainerAllocateData;
@@ -18,12 +12,11 @@ import org.springframework.yarn.am.allocate.DefaultContainerAllocator;
 import org.springframework.yarn.am.monitor.ContainerAware;
 
 import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
 
-public class SleepingApplicationMaster extends StaticEventingAppmaster {
+public class EndlessContainerAllocationApplicationMaster extends StaticEventingAppmaster {
 
-    private static final Log log = LogFactory.getLog(SleepingApplicationMaster.class);
+    private static final Log log = LogFactory.getLog(EndlessContainerAllocationApplicationMaster.class);
+    private int startNum = 1;
 
     @Override
     public void submitApplication() {
@@ -44,10 +37,11 @@ public class SleepingApplicationMaster extends StaticEventingAppmaster {
     }
 
     public void startContainer(YarnAppParameters params) {
+        String allocationGroupId = "yarn-test-app" + startNum;
         if (getAllocator() instanceof DefaultContainerAllocator) {
             DefaultContainerAllocator allocator = (DefaultContainerAllocator)getAllocator();
             allocator.setAllocationValues(
-                    "yarn-test-app",
+                    allocationGroupId,
                     params.getPriority(),
                     "",
                     params.getCoresNum(),
@@ -55,18 +49,41 @@ public class SleepingApplicationMaster extends StaticEventingAppmaster {
                     false
             );
             ContainerAllocateData data = new ContainerAllocateData();
-            data.setId("yarn-test-app");
+            data.setId(allocationGroupId);
             data.addAny(params.getContainersNum());
             allocator.allocateContainers(data);
             log.info("Container allocation: " + params.getContainersNum() + " allocated containers");
+            startNum++;
         }
-//        if (getAllocator() instanceof DefaultContainerAllocator) {
-//            DefaultContainerAllocator allocator = (DefaultContainerAllocator)getAllocator();
-//            allocator.setPriority(params.getPriority());
-//            allocator.setMemory(params.getMemory());
-//            allocator.setVirtualcores(params.getCoresNum());
-//            allocator.allocateContainers(params.getContainersNum());
-//            log.info("Container allocation: " + params.getContainersNum() + " allocated containers");
-//        }
+    }
+
+    @Override
+    protected void onContainerCompleted(ContainerStatus status) {
+
+        log.info("onContainerCompleted:" + status);
+
+        if (getMonitor() instanceof ContainerAware) {
+            ((ContainerAware)getMonitor()).onContainerStatus(Arrays.asList(status));
+        }
+
+        int exitStatus = status.getExitStatus();
+
+        // 0 - ok, -100 - container released by app
+        if (exitStatus == 0 || exitStatus == -100) {
+            if (isComplete()) {
+                log.info("No more active containers. Waiting for allocation");
+            }
+        } else {
+            log.warn("Got ContainerStatus=[" + status + "]");
+            if (!onContainerFailed(status)) {
+                setFinalApplicationStatus(FinalApplicationStatus.FAILED);
+                notifyCompleted();
+            }
+        }
+    }
+
+    public void stopApplicationMaster() {
+        setFinalApplicationStatus(FinalApplicationStatus.SUCCEEDED);
+        notifyCompleted();
     }
 }

@@ -9,6 +9,11 @@ import org.springframework.data.hadoop.fs.FsShell;
 import org.springframework.yarn.annotation.OnContainerStart;
 import org.springframework.yarn.annotation.YarnComponent;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Random;
+
 @YarnComponent
 public class HelloPojo {
 
@@ -17,16 +22,33 @@ public class HelloPojo {
     @Autowired
     private Configuration configuration;
 
-    @OnContainerStart
-    public void publicVoidNoArgsMethod() throws Exception {
-        log.info("Hello from HelloPojo");
-        log.info("About to list from hdfs root content");
 
-        FsShell shell = new FsShell(configuration);
-        for (FileStatus s : shell.ls(false, "/")) {
-            log.info(s);
+    @OnContainerStart
+    public void shuffleSort() throws Exception {
+        log.info("Hello from HelloPojo");
+
+        List<Integer> sortedList = new ArrayList<>();
+        Random random = new Random();
+        for (int i = 0; i < 100_000_000; i++) {
+            sortedList.add(random.nextInt());
         }
-        shell.close();
+
+        List<Integer> randomList = new ArrayList<>();
+        Collections.copy(randomList, sortedList);
+
+        Collections.sort(sortedList);
+
+        log.info("Trying to sort the list");
+        int i = 0;
+        while (!randomList.equals(sortedList) && i < 1_000_000) {
+            Collections.shuffle(randomList);
+            i++;
+        }
+
+        log.info("Printing the result of sorting");
+        for (i = 0; i < 100; i++) {
+            log.info(randomList.get(i));
+        }
     }
 
 }

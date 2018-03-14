@@ -19,4 +19,4 @@ spring:
             containerCount: 1
             launchcontext:
                 archiveFile: gs-yarn-basic-container-0.1.0.jar
-            appmasterClass: hello.appmaster.SleepingApplicationMaster
+            appmasterClass: hello.appmaster.EndlessContainerAllocationApplicationMaster
